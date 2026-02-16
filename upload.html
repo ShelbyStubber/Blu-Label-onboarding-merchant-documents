@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
+        .ref-code {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .form-group { margin-bottom: 25px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="email"], input[type="tel"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        .file-upload-area {
+            border: 3px dashed #d0d0d0;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #fafafa;
+        }
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #e8edff;
+        }
+        .file-upload-area input[type="file"] { display: none; }
+        .upload-icon { font-size: 48px; margin-bottom: 10px; }
+        .file-list { margin-top: 20px; }
+        .file-item {
+            background: #f5f5f5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-item button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Your Files</h1>
+        <div class="ref-code">Reference: <span id="refCode">Loading...</span></div>
+        
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="name">Your Name *</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone">
+            </div>
+            <div class="form-group">
+                <label for="notes">Additional Notes</label>
+                <textarea id="notes"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Files *</label>
+                <div class="file-upload-area" id="dropArea">
+                    <div class="upload-icon">📁</div>
+                    <p><strong>Click to browse</strong> or drag and drop</p>
+                    <input type="file" id="fileInput" multiple>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">Upload Files</button>
+        </form>
+        <div class="message" id="message"></div>
+    </div>
+    <script>
+        // Extract stubref from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const stubRef = urlParams.get('stubref');
+        document.getElementById('refCode').textContent = stubRef || 'No reference provided';
+        
+        let selectedFiles = [];
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        
+        dropArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        
+        ['dragenter', 'dragover'].forEach(e => {
+            dropArea.addEventListener(e, (ev) => {
+                ev.preventDefault();
+                dropArea.classList.add('dragover');
+            });
+        });
+        
+        ['dragleave', 'drop'].forEach(e => {
+            dropArea.addEventListener(e, (ev) => {
+                ev.preventDefault();
+                dropArea.classList.remove('dragover');
+            });
+        });
+        
+        dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
+        
+        function handleFiles(files) {
+            selectedFiles = [...selectedFiles, ...Array.from(files)];
+            displayFiles();
+        }
+        
+        function displayFiles() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            selectedFiles.forEach((file, i) => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.innerHTML = `<span>${file.name}</span><button type="button" onclick="removeFile(${i})">Remove</button>`;
+                fileList.appendChild(div);
+            });
+        }
+        
+        function removeFile(i) {
+            selectedFiles.splice(i, 1);
+            displayFiles();
+        }
+        
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedFiles.length) {
+                showMessage('Please select at least one file', 'error');
+                return;
+            }
+            
+            if (!stubRef) {
+                showMessage('Invalid upload link - missing reference code', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('name').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('notes', document.getElementById('notes').value);
+            selectedFiles.forEach(f => formData.append('files', f));
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Uploading...';
+            
+            try {
+                // Submit to Stubber webhook
+                const webhookUrl = `https://webhooks.stubber.com/im/${stubRef}/upload_documents`;
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    showMessage('Files uploaded successfully!', 'success');
+                    document.getElementById('uploadForm').reset();
+                    selectedFiles = [];
+                    displayFiles();
+                } else {
+                    showMessage('Upload failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('Error connecting to server. Please check your connection.', 'error');
+                console.error('Upload error:', error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload Files';
+            }
+        });
+        
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 5000);
+        }
+    </script>
+</body>
+</html>
