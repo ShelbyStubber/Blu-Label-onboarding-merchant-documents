@@ -3,152 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload</title>
+    <title>Blu Label Distribution – File Upload</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --blu-blue: #2233CC;
+            --blu-cyan: #00E5FF;
+            --blu-dark: #050D1A;
+            --blu-mid: #0A1A3A;
+            --glass-bg: rgba(8, 20, 50, 0.72);
+            --glass-border: rgba(0, 229, 255, 0.18);
+            --input-bg: rgba(255,255,255,0.05);
+            --text-main: #E8F0FF;
+            --text-muted: #7B9ABF;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: var(--blu-dark);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px 60px;
+            overflow-x: hidden;
+            position: relative;
         }
+
+        /* ===== ANIMATED EARTH CANVAS BACKGROUND ===== */
+        #earthCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            opacity: 0.85;
+        }
+
+        /* Radial vignette so the form area is clear */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: radial-gradient(ellipse 55% 65% at 50% 52%,
+                rgba(5,13,26,0.55) 0%,
+                rgba(5,13,26,0.88) 68%,
+                rgba(5,13,26,0.97) 100%);
+            pointer-events: none;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .header-logo {
+            height: 64px;
+            margin-bottom: 14px;
+            filter: drop-shadow(0 0 14px rgba(0,180,255,0.35));
+        }
+
+        .header h1 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .header h1 span {
+            color: var(--blu-cyan);
+        }
+
+        .header-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        /* Thin cyan accent line under header */
+        .header-line {
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--blu-cyan), transparent);
+            margin: 14px auto 0;
+            border-radius: 2px;
+        }
+
+        /* ===== CARD ===== */
         .container {
-            background: white;
+            position: relative;
+            z-index: 10;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 600px;
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            box-shadow:
+                0 0 0 1px rgba(0,229,255,0.06),
+                0 30px 80px rgba(0,0,0,0.55),
+                inset 0 1px 0 rgba(255,255,255,0.06);
+            padding: 40px 44px;
+            max-width: 580px;
             width: 100%;
         }
-        h1 { color: #333; margin-bottom: 10px; font-size: 28px; }
+
         .ref-code {
-            color: #667eea;
-            font-size: 14px;
-            margin-bottom: 30px;
+            color: var(--blu-cyan);
+            font-size: 12px;
+            margin-bottom: 28px;
             font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0.8;
         }
-        .form-group { margin-bottom: 25px; }
+
+        /* ===== FORM ===== */
+        .form-group { margin-bottom: 22px; }
+
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #555;
+            margin-bottom: 7px;
+            color: var(--text-muted);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
         }
-        input[type="text"], input[type="email"], input[type="tel"], textarea {
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            font-family: inherit;
+            background: var(--input-bg);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
         }
+
         input:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--blu-cyan);
+            background: rgba(0,229,255,0.04);
+            box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
         }
-        textarea { resize: vertical; min-height: 100px; }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(123,154,191,0.45);
+        }
+
+        textarea { resize: vertical; min-height: 90px; }
+
+        /* ===== DROP AREA ===== */
         .file-upload-area {
-            border: 3px dashed #d0d0d0;
-            border-radius: 12px;
-            padding: 40px 20px;
+            border: 2px dashed rgba(0,229,255,0.25);
+            border-radius: 14px;
+            padding: 36px 20px;
             text-align: center;
             transition: all 0.3s;
             cursor: pointer;
-            background: #fafafa;
+            background: rgba(0,229,255,0.03);
         }
-        .file-upload-area:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
+
+        .file-upload-area:hover,
         .file-upload-area.dragover {
-            border-color: #667eea;
-            background: #e8edff;
+            border-color: var(--blu-cyan);
+            background: rgba(0,229,255,0.06);
+            box-shadow: 0 0 20px rgba(0,229,255,0.08);
         }
+
         .file-upload-area input[type="file"] { display: none; }
-        .upload-icon { font-size: 48px; margin-bottom: 10px; }
-        .file-list { margin-top: 20px; }
+
+        .upload-icon {
+            font-size: 38px;
+            margin-bottom: 10px;
+            display: block;
+            filter: drop-shadow(0 0 8px rgba(0,229,255,0.5));
+        }
+
+        .file-upload-area p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .file-upload-area p strong {
+            color: var(--blu-cyan);
+        }
+
+        /* ===== FILE LIST ===== */
+        .file-list { margin-top: 14px; }
+
         .file-item {
-            background: #f5f5f5;
-            padding: 12px 16px;
+            background: rgba(0,229,255,0.05);
+            border: 1px solid rgba(0,229,255,0.12);
+            padding: 10px 14px;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 7px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--text-main);
+            font-size: 13px;
         }
+
         .file-item button {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 6px 12px;
+            background: rgba(255,60,80,0.15);
+            border: 1px solid rgba(255,60,80,0.3);
+            color: #ff6b7a;
+            padding: 4px 11px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: background 0.2s;
         }
+
+        .file-item button:hover {
+            background: rgba(255,60,80,0.28);
+        }
+
+        /* ===== SUBMIT ===== */
         .submit-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a2fd4 0%, #0077cc 100%);
             color: white;
             border: none;
-            padding: 16px 32px;
+            padding: 15px 32px;
             border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Exo 2', sans-serif;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             cursor: pointer;
             width: 100%;
             margin-top: 10px;
+            transition: opacity 0.25s, box-shadow 0.25s, transform 0.15s;
+            box-shadow: 0 4px 20px rgba(0, 120, 255, 0.3);
         }
+
+        .submit-btn:hover:not(:disabled) {
+            opacity: 0.92;
+            box-shadow: 0 6px 28px rgba(0,180,255,0.45);
+            transform: translateY(-1px);
+        }
+
         .submit-btn:disabled {
-            background: #ccc;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.35);
             cursor: not-allowed;
+            box-shadow: none;
         }
+
+        /* ===== MESSAGE ===== */
         .message {
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 20px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-top: 18px;
             display: none;
+            font-size: 14px;
+            font-weight: 500;
         }
+
         .message.success {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(0,229,130,0.1);
+            border: 1px solid rgba(0,229,130,0.3);
+            color: #00e582;
         }
+
         .message.error {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(255,70,80,0.1);
+            border: 1px solid rgba(255,70,80,0.3);
+            color: #ff6b7a;
         }
+
+        /* ===== POWERED BY STUBBER ===== */
+        .powered-by {
+            position: relative;
+            z-index: 10;
+            margin-top: 22px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            color: rgba(123,154,191,0.55);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .stubber-logo {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            object-fit: contain;
+            opacity: 0.65;
+            filter: brightness(1.3);
+        }
+
     </style>
 </head>
 <body>
+
+    <!-- Animated digital earth canvas -->
+    <canvas id="earthCanvas"></canvas>
+
+    <!-- Header -->
+    <header class="header">
+        <!-- Blu Label Unlimited SVG logo inline (recreated from brand images) -->
+        <svg class="header-logo" viewBox="0 0 220 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- b -->
+            <rect x="10" y="10" width="16" height="76" rx="8" fill="#2233CC"/>
+            <circle cx="38" cy="62" r="22" fill="none" stroke="#2233CC" stroke-width="16"/>
+            <rect x="16" y="40" width="22" height="46" fill="#050D1A"/>
+            <!-- l -->
+            <rect x="74" y="10" width="16" height="76" rx="8" fill="#2233CC"/>
+            <!-- u -->
+            <rect x="104" y="10" width="16" height="58" rx="8" fill="#2233CC"/>
+            <rect x="150" y="10" width="16" height="58" rx="8" fill="#2233CC"/>
+            <path d="M104 68 Q112 92 133 92 Q154 92 166 68" stroke="#2233CC" stroke-width="16" fill="none" stroke-linecap="round"/>
+            <!-- cyan accent square on u -->
+            <rect x="152" y="12" width="12" height="12" rx="2" fill="#00E5FF"/>
+        </svg>
+
+        <h1>Blu Label <span>Distribution</span></h1>
+        <p class="header-sub">Secure Document Upload Portal</p>
+        <div class="header-line"></div>
+    </header>
+
+    <!-- Main card -->
     <div class="container">
-        <h1>Upload Your Files</h1>
         <div class="ref-code">Reference: <span id="refCode">Loading...</span></div>
-        
+
         <form id="uploadForm">
             <div class="form-group">
                 <label for="name">Your Name *</label>
-                <input type="text" id="name" required>
+                <input type="text" id="name" placeholder="Full name" required>
             </div>
             <div class="form-group">
                 <label for="email">Email Address *</label>
-                <input type="email" id="email" required>
+                <input type="email" id="email" placeholder="you@example.com" required>
             </div>
             <div class="form-group">
                 <label for="phone">Phone Number</label>
-                <input type="tel" id="phone">
+                <input type="tel" id="phone" placeholder="+27 xx xxx xxxx">
             </div>
             <div class="form-group">
                 <label for="notes">Additional Notes</label>
-                <textarea id="notes"></textarea>
+                <textarea id="notes" placeholder="Any additional information…"></textarea>
             </div>
             <div class="form-group">
                 <label>Files *</label>
                 <div class="file-upload-area" id="dropArea">
-                    <div class="upload-icon">📁</div>
-                    <p><strong>Click to browse</strong> or drag and drop</p>
+                    <span class="upload-icon">🗂️</span>
+                    <p><strong>Click to browse</strong> or drag &amp; drop files here</p>
                     <input type="file" id="fileInput" multiple>
                 </div>
                 <div class="file-list" id="fileList"></div>
@@ -157,40 +382,186 @@
         </form>
         <div class="message" id="message"></div>
     </div>
+
+    <!-- Powered by Stubber -->
+    <div class="powered-by">
+        <span>Powered by</span>
+        <!-- Stubber logo: blue "B" wave icon recreated as inline SVG -->
+        <svg class="stubber-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="40" height="40" rx="9" fill="#1877F2"/>
+            <path d="M10 8 L10 26 Q10 34 18 34 Q26 34 26 26 L26 22 Q26 16 20 16 L14 16" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M14 16 Q8 16 8 22" stroke="white" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <span>Stubber</span>
+    </div>
+
     <script>
-        // Extract stubref from URL
+        /* =========================================================
+           DIGITAL EARTH BACKGROUND – Canvas renderer
+           Draws a complete glowing dot-sphere with connecting lines
+           ========================================================= */
+        (function () {
+            const canvas = document.getElementById('earthCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let W, H, cx, cy, R;
+            const DOTS = 500;
+            const LINES_MAX_DIST = 0.38; // fraction of R
+            const ROT_SPEED = 0.00018;
+
+            // Generate evenly distributed sphere points (Fibonacci sphere)
+            function fibonacciSphere(n) {
+                const pts = [];
+                const golden = Math.PI * (3 - Math.sqrt(5));
+                for (let i = 0; i < n; i++) {
+                    const y = 1 - (i / (n - 1)) * 2;
+                    const r = Math.sqrt(1 - y * y);
+                    const theta = golden * i;
+                    pts.push({ x: Math.cos(theta) * r, y: y, z: Math.sin(theta) * r });
+                }
+                return pts;
+            }
+
+            const basePts = fibonacciSphere(DOTS);
+            let angle = 0;
+
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+                cx = W / 2;
+                cy = H / 2;
+                R = Math.min(W, H) * 0.38;
+            }
+
+            function project(p) {
+                // Rotate around Y axis
+                const cos = Math.cos(angle), sin = Math.sin(angle);
+                const rx = p.x * cos - p.z * sin;
+                const rz = p.x * sin + p.z * cos;
+                // Tilt slightly (fixed X rotation ~15 deg)
+                const tilt = 0.26;
+                const ry = p.y * Math.cos(tilt) - rz * Math.sin(tilt);
+                const rz2 = p.y * Math.sin(tilt) + rz * Math.cos(tilt);
+
+                const sx = cx + rx * R;
+                const sy = cy + ry * R;
+                const depth = (rz2 + 1) / 2; // 0 = back, 1 = front
+                return { sx, sy, depth, rz: rz2 };
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+
+                // Dark deep-space background gradient
+                const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.75);
+                bg.addColorStop(0, '#0A1A3A');
+                bg.addColorStop(0.55, '#05101F');
+                bg.addColorStop(1, '#020810');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, W, H);
+
+                // Subtle glow behind earth
+                const glow = ctx.createRadialGradient(cx, cy, R * 0.1, cx, cy, R * 1.2);
+                glow.addColorStop(0, 'rgba(15,60,160,0.22)');
+                glow.addColorStop(0.5, 'rgba(0,120,220,0.08)');
+                glow.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, W, H);
+
+                // Project all points
+                const projected = basePts.map(p => ({ ...project(p), orig: p }));
+
+                // Draw lines between nearby points (only front-ish hemisphere)
+                for (let i = 0; i < projected.length; i++) {
+                    const a = projected[i];
+                    if (a.depth < 0.12) continue;
+                    for (let j = i + 1; j < projected.length; j++) {
+                        const b = projected[j];
+                        if (b.depth < 0.12) continue;
+                        const dx = a.orig.x - b.orig.x;
+                        const dy = a.orig.y - b.orig.y;
+                        const dz = a.orig.z - b.orig.z;
+                        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                        if (dist < LINES_MAX_DIST) {
+                            const fade = (1 - dist / LINES_MAX_DIST);
+                            const depthAlpha = Math.min(a.depth, b.depth);
+                            const alpha = fade * depthAlpha * 0.55;
+                            ctx.beginPath();
+                            ctx.moveTo(a.sx, a.sy);
+                            ctx.lineTo(b.sx, b.sy);
+                            ctx.strokeStyle = `rgba(0, 180, 255, ${alpha})`;
+                            ctx.lineWidth = 0.7;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                // Draw dots
+                for (const p of projected) {
+                    if (p.depth < 0.05) continue;
+                    const r = (1 + p.depth) * 1.6;
+                    const alpha = 0.35 + p.depth * 0.65;
+
+                    // Glow
+                    const g = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3.5);
+                    g.addColorStop(0, `rgba(0, 229, 255, ${alpha * 0.45})`);
+                    g.addColorStop(1, 'rgba(0,229,255,0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(p.sx, p.sy, r * 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Core dot
+                    ctx.beginPath();
+                    ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(100, 220, 255, ${alpha})`;
+                    ctx.fill();
+                }
+
+                angle += ROT_SPEED;
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            draw();
+        })();
+
+        /* =========================================================
+           ORIGINAL FORM LOGIC – unchanged
+           ========================================================= */
         const urlParams = new URLSearchParams(window.location.search);
         const stubRef = urlParams.get('stubref');
         document.getElementById('refCode').textContent = stubRef || 'No reference provided';
-        
+
         let selectedFiles = [];
         const dropArea = document.getElementById('dropArea');
         const fileInput = document.getElementById('fileInput');
-        
+
         dropArea.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-        
+
         ['dragenter', 'dragover'].forEach(e => {
             dropArea.addEventListener(e, (ev) => {
                 ev.preventDefault();
                 dropArea.classList.add('dragover');
             });
         });
-        
+
         ['dragleave', 'drop'].forEach(e => {
             dropArea.addEventListener(e, (ev) => {
                 ev.preventDefault();
                 dropArea.classList.remove('dragover');
             });
         });
-        
+
         dropArea.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files));
-        
+
         function handleFiles(files) {
             selectedFiles = [...selectedFiles, ...Array.from(files)];
             displayFiles();
         }
-        
+
         function displayFiles() {
             const fileList = document.getElementById('fileList');
             fileList.innerHTML = '';
@@ -201,44 +572,43 @@
                 fileList.appendChild(div);
             });
         }
-        
+
         function removeFile(i) {
             selectedFiles.splice(i, 1);
             displayFiles();
         }
-        
+
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             if (!selectedFiles.length) {
                 showMessage('Please select at least one file', 'error');
                 return;
             }
-            
+
             if (!stubRef) {
-                showMessage('Invalid upload link - missing reference code', 'error');
+                showMessage('Invalid upload link – missing reference code', 'error');
                 return;
             }
-            
+
             const formData = new FormData();
             formData.append('name', document.getElementById('name').value);
             formData.append('email', document.getElementById('email').value);
             formData.append('phone', document.getElementById('phone').value);
             formData.append('notes', document.getElementById('notes').value);
             selectedFiles.forEach(f => formData.append('files', f));
-            
+
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Uploading...';
-            
+            submitBtn.textContent = 'Uploading…';
+
             try {
-                // Submit to Stubber webhook
                 const webhookUrl = `https://webhooks.stubber.com/im/${stubRef}/upload_documents`;
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 if (response.ok) {
                     showMessage('Files uploaded successfully!', 'success');
                     document.getElementById('uploadForm').reset();
@@ -255,7 +625,7 @@
                 submitBtn.textContent = 'Upload Files';
             }
         });
-        
+
         function showMessage(text, type) {
             const msg = document.getElementById('message');
             msg.textContent = text;
